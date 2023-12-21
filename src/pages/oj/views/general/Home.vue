@@ -25,7 +25,7 @@
         <Row type="flex" justify="space-around" :gutter="10">
           <Col>
             <panel>
-              <div slot="title">✎ 지금 바로 도전해보세요!!!</div>
+              <div slot="title">✎ 지금 바로 도전해보세요!!</div>
             </panel>
           </Col>
           <Col>
