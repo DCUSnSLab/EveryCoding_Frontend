@@ -10,7 +10,7 @@
 <!--        </div>-->
 <!--      </panel>-->
 <!--    </Col> -->
-    <Col :span="22">
+    <!-- <Col :span="22">
       <panel>
         <Row type="flex" justify="space-around" :gutter="10">
           <Col>
@@ -19,7 +19,7 @@
         </Row>
       </panel>
       <br/>
-    </Col>
+    </Col> -->
     <Col :span="22">
       <panel>
         <Row type="flex" justify="space-around" :gutter="10">
