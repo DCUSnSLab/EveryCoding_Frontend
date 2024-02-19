@@ -17,19 +17,34 @@ node {
         app = docker.build("harbor.cu.ac.kr/dcucoding/ec_frontend")
     }
 
-    //docker image를 push하는 stage, 필자는 dockerhub에 이미지를 올렸으나 보통 private image repo를 별도 구축해서 사용하는것이 좋음
-    //docker.withRegistry에 dockerhub는 앞서 설정한 dockerhub credentials의 ID이다.
-    stage('Push image') {
-        docker.withRegistry("https://harbor.cu.ac.kr", "harbor") {
-            app.push("latest")
-            app.push("${env.BUILD_NUMBER}")
-        }
+    //dockerfile기반 빌드하는 stage ,git소스 root에 dockerfile이 있어야한다
+    stage('Build image'){
+        app = docker.build("harbor.cu.ac.kr/dcucoding/ec_frontend")
+        sh """
+        docker run --name sample -d -u root harbor.cu.ac.kr/dcucoding/ec_frontend
+        docker cp sample:/oj_frontend/dist .
+        docker rm -f sample
+        """
+        sh "ls -al"
+        sh "ls -al dist"
+        sh """
+        tar czvf latest.tar.gz -C dist .
+        cp latest.tar.gz build_${env.BUILD_NUMBER}.tar.gz
+        pwd
+        ls -al
+        """
     }
 
-    stage('Kubernetes deploy') {
-        sh "kubectl delete -f /services/dcucoding/ec-frontend_con.yaml -n dcucoding"
-        sh "kubectl apply -f /services/dcucoding/ec-frontend_con.yaml -n dcucoding"
+    stage("Publish on SSH") {
+
+        sshPublisher(publishers: [sshPublisherDesc(configName: 'snslab_ssh', transfers: [sshTransfer(cleanRemote: false, excludes: '', execCommand: '', execTimeout: 120000, flatten: false, makeEmptyDirs: false, noDefaultExcludes: false, patternSeparator: '[, ]+', remoteDirectory: '/static_files/everycoding', remoteDirectorySDF: false, removePrefix: '', sourceFiles: '*.tar.gz')], usePromotionTimestamp: false, useWorkspaceInPromotion: false, verbose: true)])
+
     }
+
+    //stage('Kubernetes deploy') {
+    //    sh "kubectl delete -f /services/dcucoding/ec-frontend_con.yaml -n dcucoding"
+    //    sh "kubectl apply -f /services/dcucoding/ec-frontend_con.yaml -n dcucoding"
+    //}
 
     stage('Complete') {
         sh "echo 'The end'"
